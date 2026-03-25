@@ -4,7 +4,7 @@ module load singularity/4.1.0-nompi
 
 CONTAINER_DIR="$MYSOFTWARE/singularity/vscode-setonix"
 CONTAINER_IMAGE="$CONTAINER_DIR/vscode-setonix.sif"
-singularity pull "$CONTAINER_DIR/vscode-setonix.sif" docker://cbottrell/vscode-setonix:latest
+singularity pull --force "$CONTAINER_DIR/vscode-setonix.sif" docker://cbottrell/vscode-setonix:latest
 
 # Setup SSH in fakeHome
 FAKE_HOME="$MYSOFTWARE/fakeHome"

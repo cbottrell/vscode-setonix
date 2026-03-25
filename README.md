@@ -19,6 +19,7 @@ Before getting started, you'll need:
 - **Docker Hub account** (free at https://hub.docker.com)
 - SSH access to setonix
 - Your **setonix username** and **user ID (UID/GID)**
+- Your **Pawsey project code** (e.g., `pawsey1149`)
 
 ## Step 1: Get Your setonix User Information
 
@@ -163,6 +164,26 @@ singularity pull vscode-setonix.sif docker://<DOCKER_USERNAME>/vscode-setonix:la
 ```
 
 This creates `vscode-setonix.sif` (Singularity image file).
+
+### Customize submit-container.sh with Your Pawsey Project
+
+Before submitting the job, you must update `submit-container.sh` with your Pawsey project code. SLURM does not support environment variables in batch directives, so this **must be hardcoded**.
+
+1. Edit `submit-container.sh` and find line 2:
+```bash
+#SBATCH --account=pawsey1149
+```
+
+2. Replace `pawsey1149` with your actual project code:
+```bash
+#SBATCH --account=<YOUR_PAWSEY_PROJECT_CODE>
+```
+
+To find your project code, run:
+```bash
+ssh setonix
+my_projects  # Lists all your project IDs
+```
 
 ### Submit Container Job
 

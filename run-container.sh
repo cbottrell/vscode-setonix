@@ -51,14 +51,25 @@ export SLURM_ARRAY_JOB_ID=$SLURM_ARRAY_JOB_ID
 EOF
 chmod 644 "$FAKE_HOME/.env.singularity"
 
-# Ensure .bashrc in fakeHome sources the environment variables for SSH logins
+# Ensure .bashrc and .bash_profile in fakeHome source the environment variables for SSH logins
+# SSH login shells read .bash_profile first, so we update both for compatibility
 BASHRC="$FAKE_HOME/.bashrc"
+BASH_PROFILE="$FAKE_HOME/.bash_profile"
+
 if [ -f "$BASHRC" ]; then
     if ! grep -q '.env.singularity' "$BASHRC"; then
         echo '[ -f ~/.env.singularity ] && source ~/.env.singularity' >> "$BASHRC"
     fi
 else
     echo '[ -f ~/.env.singularity ] && source ~/.env.singularity' > "$BASHRC"
+fi
+
+if [ -f "$BASH_PROFILE" ]; then
+    if ! grep -q '.env.singularity' "$BASH_PROFILE"; then
+        echo '[ -f ~/.env.singularity ] && source ~/.env.singularity' >> "$BASH_PROFILE"
+    fi
+else
+    echo '[ -f ~/.env.singularity ] && source ~/.env.singularity' > "$BASH_PROFILE"
 fi
 
 # Start Singularity container with SSH server

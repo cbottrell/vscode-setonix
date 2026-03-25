@@ -11,6 +11,75 @@ A containerized development environment using Ubuntu 22.04 with SSH server, allo
 - **Runs on compute nodes** via SLURM scheduler
 - **Accessible from Mac/Linux** via ProxyJump through login node
 
+## Setup: SSH Keys
+
+**IMPORTANT:** Before running the container, you must add your SSH public keys to the `authorized_keys` section in `run-container.sh`. You need TWO keys:
+
+1. **Your local machine public key** (to connect from your Mac/Linux to the container)
+2. **Your setonix public key** (to SSH from setonix into the container)
+
+### Generate SSH Keys (if needed)
+
+If you don't already have SSH keys, generate them on both your local machine AND on setonix:
+
+**On your local machine (Mac/Linux):**
+```bash
+# Generate a new Ed25519 key (recommended)
+ssh-keygen -t ed25519 -C "your-email@example.com"
+
+# Or if your system doesn't support Ed25519, use RSA:
+ssh-keygen -t rsa -b 4096 -C "your-email@example.com"
+```
+
+Press Enter at all prompts to use defaults. Your keys will be saved to `~/.ssh/id_ed25519` (or `~/.ssh/id_rsa`).
+
+**On setonix (via login node):**
+```bash
+ssh setonix
+ssh-keygen -t ed25519 -C "bottrell@setonix"
+# Press Enter at all prompts
+exit
+```
+
+### Add Your Public Keys to run-container.sh
+
+You **must** edit `run-container.sh` and replace the default `authorized_keys` with your own keys.
+
+1. Get your local machine's public key:
+```bash
+cat ~/.ssh/id_ed25519.pub  # or ~/.ssh/id_rsa.pub
+```
+
+2. Get your setonix public key (from setonix):
+```bash
+ssh setonix
+cat ~/.ssh/id_ed25519.pub  # or ~/.ssh/id_rsa.pub
+exit
+```
+
+3. Edit `run-container.sh` and update the `authorized_keys` section (around line 20):
+
+```bash
+cat > "$SSH_DIR/authorized_keys" <<'EOF'
+<your local machine public key>
+<your setonix public key>
+EOF
+```
+
+Each key should be on its own line. Replace the existing placeholder keys with your own keys.
+
+### Alternative: Auto-import Authorized Keys
+
+For a more user-friendly approach, copy your setonix `authorized_keys` to the container's fakeHome before running:
+
+```bash
+mkdir -p "$MYSOFTWARE/fakeHome/.ssh"
+cp ~/.ssh/authorized_keys "$MYSOFTWARE/fakeHome/.ssh/authorized_keys"
+chmod 600 "$MYSOFTWARE/fakeHome/.ssh/authorized_keys"
+```
+
+Then update `run-container.sh` to skip the hardcoded keys and use the copied file instead.
+
 ## Quick Start
 
 ### 1. Run the Container on setonix

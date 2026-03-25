@@ -18,7 +18,7 @@ A containerized development environment using Ubuntu 22.04 with SSH server, allo
 Submit the job to run the container on a compute node:
 
 ```bash
-cd /software/projects/pawsey1149/bottrell/singularity/vscode-cvaltdm
+cd /software/projects/pawsey1149/bottrell/singularity/vscode-setonix
 sbatch submit-container.sh
 ```
 
@@ -26,6 +26,8 @@ Watch the output:
 ```bash
 tail -f dev.out
 ```
+
+**Note:** Running the container automatically creates a `$MYSOFTWARE/fakeHome` folder. This directory contains all VS Code cache and extensions that persist across container runtimes and rebuilds, enabling a consistent development environment.
 
 ### 2. Get the Compute Node Hostname
 
@@ -94,13 +96,10 @@ The container must be built for AMD64 (setonix architecture):
 
 ```bash
 # Navigate to repo
-cd /path/to/vscode-cvaltdm
+cd /path/to/vscode-setonix
 
-# Build for AMD64 Linux
-docker buildx build --platform linux/amd64 -t cbottrell/cvaltdm-dev:latest .
-
-# Push to Docker Hub
-docker buildx build --platform linux/amd64 --push -t cbottrell/cvaltdm-dev:latest .
+# Build and push to Docker Hub
+docker buildx build --platform linux/amd64 --push -t cbottrell/vscode-setonix:latest .
 ```
 
 Requires: `docker buildx` (available in Docker Desktop)
@@ -111,13 +110,13 @@ After pushing to Docker Hub:
 
 ```bash
 module load singularity/4.1.0-nompi
-cd /software/projects/pawsey1149/bottrell/singularity/vscode-cvaltdm
+cd /software/projects/pawsey1149/bottrell/singularity/vscode-setonix
 
 # Pull and convert to Singularity format
-singularity pull --force cvaltdm-dev.sif docker://cbottrell/cvaltdm-dev:latest
+singularity pull --force vscode-setonix.sif docker://cbottrell/vscode-setonix:latest
 ```
 
-This creates `cvaltdm-dev.sif` (Singularity image file).
+This creates `vscode-setonix.sif` (Singularity image file).
 
 ## Files Overview
 

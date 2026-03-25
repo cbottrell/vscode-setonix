@@ -22,7 +22,7 @@ echo "Singularity version: $(singularity --version)"
 echo ""
 
 echo "Navigating to container directory..."
-cd /software/projects/pawsey1149/bottrell/singularity/vscode-cvaltdm
+cd /software/projects/pawsey1149/bottrell/singularity/vscode-setonix
 echo "Working directory: $(pwd)"
 echo ""
 

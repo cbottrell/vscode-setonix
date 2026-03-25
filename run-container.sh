@@ -27,7 +27,7 @@ chmod 600 "$SSH_DIR/authorized_keys"
 hostname > "$FAKE_HOME/.container_host"
 
 # Start Singularity container with SSH server
-CONTAINER_IMAGE="cvaltdm-dev.sif"
+CONTAINER_IMAGE="vscode-setonix.sif"
 
 singularity run --home="$FAKE_HOME" "$CONTAINER_IMAGE" &
 echo "Container started with PID $!"

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=$PAWSEY_PROJECT
+#SBATCH --account=pawsey1149
 #SBATCH --partition=work
 #SBATCH --job-name=dev-container
 #SBATCH --ntasks=1

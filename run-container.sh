@@ -2,6 +2,10 @@
 
 module load singularity/4.1.0-nompi
 
+CONTAINER_DIR="$MYSOFTWARE/singularity/vscode-setonix"
+CONTAINER_IMAGE="$CONTAINER_DIR/vscode-setonix.sif"
+singularity pull "$CONTAINER_DIR/vscode-setonix.sif" docker://cbottrell/vscode-setonix:latest
+
 # Setup SSH in fakeHome
 FAKE_HOME="$MYSOFTWARE/fakeHome"
 SSH_DIR="$FAKE_HOME/.ssh"
@@ -27,7 +31,7 @@ chmod 600 "$SSH_DIR/authorized_keys"
 hostname > "$FAKE_HOME/.container_host"
 
 # Start Singularity container with SSH server
-CONTAINER_IMAGE="vscode-setonix.sif"
+CONTAINER_IMAGE="$CONTAINER_DIR/vscode-setonix.sif"
 
 singularity run --home="$FAKE_HOME" "$CONTAINER_IMAGE" &
 echo "Container started with PID $!"

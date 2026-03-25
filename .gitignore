@@ -35,3 +35,4 @@ test-extensions/
 
 # Singularity temporary files
 .singularity/
+dev-container.out

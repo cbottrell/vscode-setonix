@@ -33,12 +33,17 @@ hostname > "$FAKE_HOME/.container_host"
 # Write environment variables to a file that can be sourced in the container
 # This ensures variables are available in SSH login shells
 cat > "$FAKE_HOME/.env.singularity" <<EOF
+# Conda/Python environment from the Jupyter base image
+export PATH="/opt/conda/bin:\$PATH"
+
+# Setonix environment
 export MYSOFTWARE=$MYSOFTWARE
 export MYSCRATCH=$MYSCRATCH
 export SLURM_NODELIST=$SLURM_NODELIST
 export SLURM_NNODES=$SLURM_NNODES
 export SLURM_NTASKS=$SLURM_NTASKS
 export SLURM_CPUS_PER_TASK=$SLURM_CPUS_PER_TASK
+export OMP_NUM_THREADS=$OMP_NUM_THREADS
 export SLURM_JOB_ID=$SLURM_JOB_ID
 export SLURM_JOB_NAME=$SLURM_JOB_NAME
 export SLURM_SUBMIT_DIR=$SLURM_SUBMIT_DIR

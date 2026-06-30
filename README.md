@@ -1,13 +1,14 @@
-# VS Code + Singularity Container for setonix
+# VS Code + Jupyter Singularity Container for setonix
 
-A containerized development environment using Ubuntu 22.04 with SSH server, allowing remote VS Code connections to compute nodes on the Pawsey setonix supercomputer.
+A containerized development environment using the Jupyter minimal notebook image with an SSH server, allowing remote VS Code connections to compute nodes on the Pawsey setonix supercomputer.
 
 ## Features
 
 - **SSH-based access** on port 9300
 - **Key-based authentication** (no passwords)
 - **X11 forwarding** support
-- **Python 3.10** with pip
+- **Python 3.13** from the Jupyter Conda environment
+- **Python packages installed from `requirements.txt`**
 - **Runs on compute nodes** via SLURM scheduler
 - **Accessible from Mac/Linux** via ProxyJump through login node
 
@@ -59,7 +60,11 @@ RUN groupadd -g <YOUR_GID> <YOUR_USERNAME> && \
 
 Replace `<YOUR_UID>`, `<YOUR_GID>`, and `<YOUR_USERNAME>` with values from Step 1.
 
-## Step 3: Build and Push to Docker Hub
+## Step 3: Review Python Requirements
+
+Python packages are installed from `requirements.txt` during the Docker build. Add, remove, or pin packages there before building the image.
+
+## Step 4: Build and Push to Docker Hub
 
 Now build the Docker image with your credentials and push it to your Docker Hub account.
 
@@ -78,7 +83,7 @@ docker buildx build --platform linux/amd64 --push -t <DOCKER_USERNAME>/vscode-se
 
 **Note:** This builds for AMD64 (setonix architecture) and pushes directly to Docker Hub.
 
-## Step 4: Set Up SSH Keys
+## Step 5: Set Up SSH Keys
 
 Generate SSH keys (if needed) on both your local machine and setonix, then update `run-container.sh` with both public keys.
 
@@ -137,7 +142,7 @@ git commit -m "Add SSH keys for my account"
 git push  # Only if you have write access, or push to your own fork
 ```
 
-## Step 5: Use on setonix
+## Step 6: Use on setonix
 
 Now that you've built and pushed your custom image, you can use it on setonix.
 
@@ -213,7 +218,7 @@ Update your ~/.ssh/vscode-setonix_config.txt vscode-setonix entry with:
     HostName nid001234
 ```
 
-## Step 6: Connect from Your Local Machine
+## Step 7: Connect from Your Local Machine
 
 ### Configure SSH
 
@@ -286,13 +291,15 @@ This is by design to maintain proper permissions and security.
 | File | Purpose |
 |------|---------|
 | `Dockerfile` | Container definition - **must be customized** with your UID/GID/username |
+| `requirements.txt` | Python packages installed into the Jupyter Conda environment |
 | `run-container.sh` | Startup script: sets up SSH keys, writes hostname, runs container |
 | `submit-container.sh` | SLURM batch script to submit container job |
 | `get-container-host.sh` | Helper to retrieve compute node hostname for SSH config |
 
 ## Container Details
 
-- **Base OS:** Ubuntu 22.04 LTS
+- **Base Image:** `quay.io/jupyter/minimal-notebook:x86_64-python-3.13`
+- **Python:** `/opt/conda/bin/python`
 - **SSH Port:** 9300 (inside container)
 - **SSH Config:**
   - Key-based auth only
@@ -311,6 +318,7 @@ This is by design to maintain proper permissions and security.
 **Docker build fails**
 - Ensure you updated the Dockerfile with your actual UID/GID values
 - Check that username, UID, and GID are all valid (no spaces)
+- Check package names and version pins in `requirements.txt`
 
 **SSH Connection Refused**
 - Verify container is running: `squeue -u <YOUR_USERNAME>`
@@ -352,16 +360,14 @@ The container uses:
 
 ## Advanced Usage
 
-### Extend Container
+### Add Python Packages
 
-Add packages by modifying the `Dockerfile`:
+Add Python packages by modifying `requirements.txt`:
 
-```dockerfile
-# Install additional packages
-RUN apt-get update && apt-get install -y \
-    git \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+```text
+numpy
+pandas
+your-package-name
 ```
 
 Then rebuild:
@@ -389,7 +395,7 @@ Modify `submit-container.sh`:
 
 - **GitHub:** https://github.com/cbottrell/vscode-setonix
 - **Docker Hub:** https://hub.docker.com/r/<YOUR_DOCKER_HUB_USERNAME>/vscode-setonix
-- **Base Image:** Ubuntu 22.04 LTS
+- **Base Image:** quay.io/jupyter/minimal-notebook:x86_64-python-3.13
 - **SSH Port:** 9300
 
 ## Customization Checklist
@@ -397,6 +403,7 @@ Modify `submit-container.sh`:
 Before first use, ensure you have:
 
 - [ ] Updated Dockerfile with your username/UID/GID
+- [ ] Reviewed `requirements.txt`
 - [ ] Updated `run-container.sh` with your public SSH keys
 - [ ] Built and pushed container to your Docker Hub account
 - [ ] Updated SSH config files with your username

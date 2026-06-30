@@ -27,7 +27,7 @@ echo "Working directory: $(pwd)"
 echo ""
 
 echo "Starting container with SSH server..."
-bash run-container.sh
+bash run-container.sh || exit 1
 echo ""
 
 echo "Container is running. Job will remain active for the duration of the allocation."

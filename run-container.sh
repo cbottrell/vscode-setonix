@@ -90,6 +90,50 @@ fi
 # but not for SSH logins. The .env.singularity file handles variables for SSH sessions.
 CONTAINER_IMAGE="$CONTAINER_DIR/vscode-setonix.sif"
 
+echo "Starting SSH container..."
 singularity run --home="$FAKE_HOME" "$CONTAINER_IMAGE" &
-echo "Container started with PID $!"
+CONTAINER_PID=$!
+echo "Container started with PID $CONTAINER_PID"
+
+# Wait briefly for sshd to initialize. The SLURM job can remain alive even if
+# the container exits, so check the process and port before reporting success.
+sleep 3
+
+if ! ps -p "$CONTAINER_PID" >/dev/null 2>&1; then
+    echo "ERROR: Singularity container exited before SSH was ready."
+    echo "Check the SLURM output above for sshd or container startup errors."
+    exit 1
+fi
+
+PORT_LISTENING="unknown"
+if command -v ss >/dev/null 2>&1; then
+    if ss -tuln | grep -q ':9300'; then
+        PORT_LISTENING="yes"
+    else
+        PORT_LISTENING="no"
+    fi
+elif command -v netstat >/dev/null 2>&1; then
+    if netstat -tuln | grep -q ':9300'; then
+        PORT_LISTENING="yes"
+    else
+        PORT_LISTENING="no"
+    fi
+fi
+
+if [ "$PORT_LISTENING" = "yes" ]; then
+    echo "SSH server is listening on port 9300"
+elif [ "$PORT_LISTENING" = "no" ]; then
+    echo "ERROR: SSH server is not listening on port 9300."
+    echo "If another container on this node already uses port 9300, cancel it or change one container's SSH port."
+    echo "Checking sshd processes inside the image:"
+    singularity exec --home="$FAKE_HOME" "$CONTAINER_IMAGE" ps aux | grep '[s]shd' || true
+    exit 1
+else
+    echo "WARNING: Could not verify port 9300 because neither ss nor netstat is available."
+    echo "Checking sshd processes inside the image:"
+    singularity exec --home="$FAKE_HOME" "$CONTAINER_IMAGE" ps aux | grep '[s]shd' || true
+fi
+
 echo "Hostname written to $FAKE_HOME/.container_host"
+echo "Container hostname:"
+cat "$FAKE_HOME/.container_host"
